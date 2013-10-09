@@ -5,3 +5,37 @@ body {
 .hidden {
     display: none;
 }
+
+#thesis-title{
+	font-family: century gothic;
+	margin-left: 25px;
+	font-weight: bold
+}
+
+#thesis-subtitle{
+	font-family: century gothic;
+	margin-left: 35px;
+}
+
+#thesis-description{
+	font-family: century gothic;
+	margin-left: 40px;
+	letter-spacing: 1px;
+	text-align: justify;
+}
+
+#footer
+{
+	background-color: #f1f1f1;
+	padding-top: 15px;
+	font-size: 11px;
+	font-family: century gothic;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+
+.fb-comments{
+	margin-top: 20px;
+	margin-left: 40px;
+	padding-bottom: 50px;
+}

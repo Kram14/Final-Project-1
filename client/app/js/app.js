@@ -12,9 +12,13 @@ $(function() {
             $('.btn-login').attr('href', '/api/login?url=/');
             $('.btn-logout').attr('href','/api/logout?url=/');
 
+            this.router = new Router();
             this.setEventListeners();
             this.getUser();
+
+            Backbone.history.start({pushState: true});
         },
+
         setEventListeners: function() {
             var self = this;
             $('.menu-crud .item a').click(function(ev) {
@@ -24,14 +28,21 @@ $(function() {
                 $el.addClass("active");
 
                 if ($el.hasClass('menu-list')) {
-                    self.showList();
+                    self.router.navigate('list', {trigger: true});
                 }
 
                 if ($el.hasClass('menu-create')) {
-                    self.showForm();
+                    self.router.navigate('new', {trigger: true});
                 }
             });
+
+            $('.navbar-brand').click(function() {
+                self.router.navigate('', {trigger: true});
+                $('.menu-create').removeClass('active');
+                $('.menu-list').removeClass('active');
+            });
         },
+
         getUser: function() {
             var self = this;
             $.ajax({
@@ -54,6 +65,7 @@ $(function() {
            $('.menu-loading').addClass('hidden');
            $('.menu-user').addClass('hidden');
            $('.btn-login').removeClass('hidden');
+
         },
         showLogout: function() {
            $('.menu-crud').removeClass('hidden');
@@ -61,6 +73,9 @@ $(function() {
            $('.menu-loading').addClass('hidden');
            $('.btn-login').addClass('hidden');
            $('.menu-user').removeClass('hidden');
+        },
+        showHome: function() {
+            $('.app-content').html('');
         },
         showList: function() {
             var $listTemplate = getTemplate('tpl-thesis-list');
@@ -76,13 +91,9 @@ $(function() {
             $('.app-content').html($formTemplate);
 
 
-            $('form').unbind('submit').submit(function(ev) {
-                var thesisObject = {};
-                var inputs = $('form').serializeArray();
-                for (var i = 0; i < inputs.length; i++) {
-                    thesisObject[inputs[i].name] = inputs[i].value;
-                }
-                self.save(thesisObject);
+            $('form').unbind('submit').submit(function(ev) 
+            {
+                $.get('/api/thesis', self.save);
                 return false;
             });
 
@@ -94,13 +105,45 @@ $(function() {
             console.log('response', list);
             //  use tpl-thesis-list-item to render each loaded list and attach it
 
+            for (var i = 0; i < list.length; i++)
+            {
+                $('.thesis-list').append(getTemplate('tpl-thesis-list-item', list[i]));
+            }
+            
+            $('.table tbody tr').click(function (event)
+            {
+                app.router.navigate('thesis-' + $(this).attr('data-id'), {trigger: true});
+                fbcomment(document, 'script', 'facebook-jssdk');
+
+            });
+
         },
         save: function(object) {
             var self = this;
 
+            var thesisObject = {};
+            var inputs = $('form').serializeArray();
+            for (var i = 0; i < inputs.length; i++) 
+            {
+                thesisObject[inputs[i].name] = inputs[i].value;
+            }
+
+            if (thesisObject.Title.length != 0 && thesisObject.Description.length != 0)
+            { 
+                
+                $.post('/api/thesis', thesisObject);
+                alert("A new thesis entry was saved");
+            }
+
+            else
+            {
+                alert("Forbidden: Thesis title and description are required!");
+            }
+
+        },
+        viewEachThesis: function(object) {
+           $('.app-content').html(getTemplate('tpl-thesis-show-item', object));
         }
-
-
     };
 
     function getTemplate(template_id, context) {
@@ -112,6 +155,48 @@ $(function() {
 
     }
 
+    function fbcomment(d, s, id)
+    {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=527242004024374";
+        fjs.parentNode.insertBefore(js, fjs);
+    }
+
+
+    var Router = Backbone.Router.extend({
+        routes: {
+            '': 'onHome',
+            'thesis-:id': 'onView',
+            'new': 'onCreate',
+            'edit': 'onEdit',
+            'list': 'onList'
+        },
+
+       onHome: function() {
+            app.showHome();
+       },
+
+       onView: function(id) {
+           console.log('thesis id', id);
+           $.get('api/thesis/' + id, app.viewEachThesis);
+       },
+
+       onCreate: function() {
+            app.showForm();
+       },
+
+       onEdit: function() {
+
+       },
+
+       onList: function() {
+            app.showList();
+       }
+
+    });
     app.init();
+
 
 });
