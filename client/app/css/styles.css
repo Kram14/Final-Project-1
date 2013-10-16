@@ -35,7 +35,13 @@ body {
 }
 
 .fb-comments{
-	margin-top: 20px;
+	margin-top: 10px;
 	margin-left: 40px;
-	padding-bottom: 50px;
+	padding-bottom: 60px;
+}
+
+.fb-like{
+	margin-left: 35px;
+	margin-bottom: 20px;
+	margin-top: 10px;
 }
